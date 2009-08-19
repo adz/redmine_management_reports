@@ -29,7 +29,7 @@ table {border: 1px solid #ddd}
   -
   <%= text_field_tag 'to', params[:to] || Date.current - 1 %>
   
-  Versions: <%= select_tag :versions, options_for_select(@active_versions.map{|v| [v.name, v.id]}, params[:versions]), :multiple => true, :size => 10 %>
+  Versions: <%= select_tag :versions, "<option value='' Selected>Remaining Versions</option>"+options_for_select(@active_versions.map{|v| [v.name, v.id]}), :multiple => true, :size => 10 %>
   <%= submit_tag 'Update' %>
   </form>
 </p>

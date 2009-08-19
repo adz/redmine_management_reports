@@ -7,8 +7,8 @@ class ManagementReportsController < ApplicationController
     # Run on Monday, to get previous Mon - Sunday
     @from = (params[:from] || Date.current - 7).to_date
     @to   = (params[:to]   || Date.current - 1).to_date
-    @version = if params[:version]
-      Version.find(params[:version].split(','))
+    @version = if (!params[:versions].blank? and !params[:versions].reject(&:blank?).empty? )
+      Version.find_by_id(params[:versions])
     else
       @project.versions.reject(&:completed?)
     end
