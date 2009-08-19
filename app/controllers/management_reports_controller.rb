@@ -7,7 +7,11 @@ class ManagementReportsController < ApplicationController
     # Run on Monday, to get previous Mon - Sunday
     @from = (params[:from] || Date.current - 7).to_date
     @to   = (params[:to]   || Date.current - 1).to_date
-
+    @version = if params[:version]
+      Version.find(params[:version].split(','))
+    else
+      @project.versions.reject(&:completed?)
+    end
 
     new_issues = @project.issues.find(:all,
       :conditions => {
@@ -17,8 +21,7 @@ class ManagementReportsController < ApplicationController
     @new_issues_report = new_issues_report(new_issues)
 
 
-    @time_entries = @project.time_entries.find(:all,
-      :conditions => {
+    @time_entries = TimeEntry.all(:conditions => {
         :spent_on => (@from..@to)
       }
     )
@@ -28,10 +31,13 @@ class ManagementReportsController < ApplicationController
 
     @remaining_issues = @project.issues.find(:all,
       :conditions => {
-        :status_id => IssueStatus.all(:conditions => {:is_closed => false})
+        :status_id => IssueStatus.all(:conditions => {:is_closed => false}),
+        :fixed_version_id => @version
       }
     )
     @remaining_issues_report = remaining_issues_report(@remaining_issues)
+
+    @active_versions = @project.versions.reject(&:completed?)
 
     respond_to do |format|
       format.csv do
@@ -103,6 +109,7 @@ Remaining Issue
     time_entry_report.style_rows('issue'){|row|true}
     time_entry_report.aggregate(:sum => :hours).process
 
+    time_entry_report.sort([:project, :activity])
     time_entry_report.subgroup([:project, :activity], :with_headers => true)
 
     # Return it
@@ -146,7 +153,8 @@ Remaining Issue
 
 
   def humanize_column_titles(report)
-    report.column_titles = report.columns.
+    report.column_titles = report.
+      columns.
       map{|col| {col => col.to_s.humanize} }.
       inject({}) {|a,b| a.merge(b) }
   end
