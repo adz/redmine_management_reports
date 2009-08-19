@@ -1,0 +1,37 @@
+<style>
+tr.group0 { background: #bbb;}
+
+tr.groupHeader1 { background: #ddd;}
+tr.group1 { background: #ddd;}
+
+
+table tr td {
+  padding: 0 15px;
+  border: 1px solid #eee;
+  text-align: left;
+}
+table tr th { 
+  padding: 5px 15px;
+  border: 1px solid #eee;
+  text-align: left;
+}
+table {border: 1px solid #ddd}
+.columnTitle { border-bottom: 1px solid #ddd; text-decoration: underline}
+
+</style>
+<h2>Management Reports</h2>
+
+<h3>New Issues</h3>
+<%= Munger::Render.to_html(@new_issues_report, :classes => {:table => 'list'}) %>
+<p>&nbsp;</p>
+
+
+<h3>Time Spent</h3>
+<%= Munger::Render.to_html(@time_entries_report, :classes => {:table => 'list'}) %>
+
+<p>&nbsp;</p>
+
+
+<h3>Remaining Work</h3>
+<%= Munger::Render.to_html(@remaining_issues_report, :classes => {:table => 'list'}) %>
+
