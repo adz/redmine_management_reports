@@ -8,7 +8,7 @@ class ManagementReportsController < ApplicationController
     @from = (params[:from] || Date.current - 7).to_date
     @to   = (params[:to]   || Date.current - 1).to_date
     @version = if (!params[:versions].blank? and !params[:versions].reject(&:blank?).empty? )
-      Version.find_by_id(params[:versions])
+      Version.find_all_by_id(params[:versions])
     else
       @project.versions.reject(&:completed?)
     end
@@ -129,7 +129,7 @@ Remaining Issue
     )
 
     data.transform_column(:estimated_hours) do |row|
-      row.estimated_hours || 'No Est'
+      row.estimated_hours || 0
     end
 
     data.add_column(:time_spent) do |row|
@@ -141,9 +141,9 @@ Remaining Issue
       "#{row.done_ratio}%"
     end
 
-
     new_issues_report = Munger::Report.from_data(data).process
     new_issues_report.columns [:id, :tracker, :priority, :subject, :estimated_hours, :done_ratio, :time_spent]
+    new_issues_report.aggregate(:sum => [:estimated_hours, :time_spent]).process
     humanize_column_titles(new_issues_report)
 
     new_issues_report.style_rows('issue') {|row| true} # always styles rows as issues
