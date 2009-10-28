@@ -34,16 +34,6 @@ table {border: 1px solid #ddd}
   </form>
 </p>
 
-<h3>New Issues</h3>
-<%= Munger::Render.to_html(@new_issues_report, :classes => {:table => 'list'}) %>
+<h3>Worked on, New or Remaining Features & Issues</h3>
+<%= Munger::Render.to_html(@reportable_issues_report, :classes => {:table => 'list'}) %>
 <p>&nbsp;</p>
-
-
-<h3>Time Spent</h3>
-<%= Munger::Render.to_html(@time_entries_report, :classes => {:table => 'list'}) %>
-<p>&nbsp;</p>
-
-
-<h3>Remaining Work</h3>
-<%= Munger::Render.to_html(@remaining_issues_report, :classes => {:table => 'list'}) %>
-
