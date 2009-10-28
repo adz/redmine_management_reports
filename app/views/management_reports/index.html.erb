@@ -17,7 +17,8 @@ table tr th {
 }
 table {border: 1px solid #ddd}
 .columnTitle { border-bottom: 1px solid #ddd; text-decoration: underline}
-
+.completedIssue td { text-decoration: line-through; background: #ccc}
+.numeric {text-align: right}
 </style>
 <h2>Management Reports</h2>
 
@@ -29,7 +30,7 @@ table {border: 1px solid #ddd}
   -
   <%= text_field_tag 'to', params[:to] || Date.current - 1 %>
   
-  Versions: <%= select_tag :versions, "<option value='' Selected>Remaining Versions</option>"+options_for_select(@active_versions.map{|v| [v.name, v.id]}), :multiple => true, :size => 10 %>
+  Versions: <%= select_tag :versions, "<option value='' Selected>Remaining Versions</option>"+options_for_select(@active_versions.map{|v| [v.name, v.id]}, @versions.map(&:id)), :multiple => true, :size => 10 %>
   <%= submit_tag 'Update' %>
   </form>
 </p>
@@ -37,3 +38,4 @@ table {border: 1px solid #ddd}
 <h3>Worked on, New or Remaining Features & Issues</h3>
 <%= Munger::Render.to_html(@reportable_issues_report, :classes => {:table => 'list'}) %>
 <p>&nbsp;</p>
+
