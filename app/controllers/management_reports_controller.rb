@@ -38,7 +38,7 @@ class ManagementReportsController < ApplicationController
 
     @reportable_issues_report = Munger::Report.from_data(data).process
     @reportable_issues_report.columns [:id, :why, :status, :project, :tracker, :priority, :subject, :estimated_hours, :time_spent_to_date, :time_spent_in_period, :remaining]
-    @reportable_issues_report.sort(:why).aggregate(:sum => [:estimated_hours, :time_spent_in_period, :remaining]).process
+    @reportable_issues_report.sort(:id).aggregate(:sum => [:estimated_hours, :time_spent_in_period, :remaining]).process
     humanize_column_titles(@reportable_issues_report)
 
     @reportable_issues_report.style_rows('issue') {|row| true} # always styles rows as issues
@@ -63,7 +63,7 @@ All Work: Done & Remaining
 
   private
   def get_reportable_issues(project, versions, from, to)
-    new_issues = project.issues.all(:conditions => {
+    new_issues = project.issues.all(:conditions => { 
         :created_on => from..(to+1) # cheat -- +1 as time is from midnight
     }).map{|i| issue_report(i, from, to, 'NEW')}
 
@@ -81,11 +81,19 @@ All Work: Done & Remaining
         :fixed_version_id => versions
       }
     ).map{|i| issue_report(i, from, to, "TODO")}
+    
 
     all_issues = []
     (remaining_issues + new_issues + issues_worked_on).group_by{|i| i['id']}.each{|id,issues|
-	all_issues << issues.first.merge(:why => issues.map{|i| i[:why]}.join(", "))
+	all_issues << issues.first.merge(:why => issues.map{|i| i[:why]})
     }
+
+    all_issues.each do |issue|
+      issue[:why] ||= []
+      issue[:why] << "NEW" if issue[:created_on] > from
+      issue[:why] = issue[:why].sort.uniq.join(",")
+    end
+
     all_issues
   end
 
@@ -101,6 +109,7 @@ All Work: Done & Remaining
     end.abs
 
     issue.attributes.merge(
+      :created_on => issue.created_on,
       :status   => issue.status.to_s,
       :project  => issue.project.to_s,
       :tracker  => issue.tracker.to_s,
